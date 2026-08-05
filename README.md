@@ -282,6 +282,7 @@ bench-all.sh      cpu-bench.sh    gpu-bench.sh    npu-bench.sh
 fetch-assets.sh
 tools/            mk-charts.py, which redraws every README chart from report/
 docs/             the generated charts, light and dark
+docs/png/         the same charts rasterised at 2x, for platforms that reject SVG
 report/           reference run committed for the numbers quoted above
 results/          local run output (gitignored)
 tflite/           downloaded binary and models (gitignored)

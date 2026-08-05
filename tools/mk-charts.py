@@ -236,12 +236,42 @@ def sweep_chart(t, data):
 
 # --------------------------------------------------------------------- build
 
+PNG_SCALE = 2          # 2x so the raster stays crisp on high-DPI screens
+PNG_DIR = os.path.join(DOCS, "png")
+
+
+def to_png(svg_path):
+    """Rasterise one SVG next to its siblings in docs/png/.
+
+    Uses GdkPixbuf's librsvg loader, which is present on most Linux desktops
+    (python3-gi + librsvg2-common). Missing it is not fatal - the SVGs are the
+    real deliverable and PNGs only exist for publishing platforms that will not
+    take SVG.
+    """
+    try:
+        import gi
+        gi.require_version("GdkPixbuf", "2.0")
+        from gi.repository import GdkPixbuf
+    except (ImportError, ValueError):
+        return False
+    os.makedirs(PNG_DIR, exist_ok=True)
+    base = GdkPixbuf.Pixbuf.new_from_file(svg_path)
+    w, h = base.get_width(), base.get_height()
+    out = os.path.join(PNG_DIR, os.path.basename(svg_path)[:-4] + ".png")
+    GdkPixbuf.Pixbuf.new_from_file_at_scale(
+        svg_path, w * PNG_SCALE, h * PNG_SCALE, True).savev(out, "png", [], [])
+    return True
+
+
 def write(name, fn):
     os.makedirs(DOCS, exist_ok=True)
+    png = 0
     for mode, t in THEMES.items():
-        with open(os.path.join(DOCS, f"{name}-{mode}.svg"), "w") as f:
+        path = os.path.join(DOCS, f"{name}-{mode}.svg")
+        with open(path, "w") as f:
             f.write(fn(t))
-    print(f"  {name}-{{light,dark}}.svg")
+        png += to_png(path)
+    print(f"  {name}-{{light,dark}}.svg" + (f"  (+{png} png)" if png else ""))
 
 
 MODEL = "mobilenet_v1_1.0_224_quant.tflite"
