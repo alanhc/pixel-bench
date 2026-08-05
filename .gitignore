@@ -1,0 +1,7 @@
+# Benchmark assets: a 7 MB prebuilt binary plus ~130 MB of model tarballs, all of them
+# redistributable downloads rather than anything authored here. Fetch them with
+# tflite/fetch.sh - see the README.
+tflite/
+
+# Local run output. The reference run that the README quotes is committed under report/.
+results/

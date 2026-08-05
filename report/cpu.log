@@ -1,0 +1,38 @@
+=== shiba CPU bench ===
+workload : toybox sha256sum /data/local/tmp/cpubench/bench.bin
+passes   : core[task-clock,cpu-cycles,instructions]
+           branch[task-clock,cpu-cycles,raw-br-retired,raw-br-mis-pred-retired]
+           l1[task-clock,cpu-cycles,raw-l1d-cache,raw-l1d-cache-refill]
+repeats  : 3   cooldown: 3s
+thermal  : BIG=38.0C MID=38.0C LITTLE=37.0C quiet_therm=31.8C 
+
+governors pinned to performance (will restore: policy0=sched_pixel policy4=sched_pixel policy8=sched_pixel)
+
+CLUSTER  RUN   TIME(ms)      GHz    IPC    BR(M)  BR-MISS%  L1D-MISS%
+----------------------------------------------------------------------
+little     1      144.9    1.732  0.807     14.0     6.049      0.542
+little     2      143.5    1.728  0.814     14.1     5.253      0.537
+little     3      143.8    1.723  0.814     14.1     5.979      0.552
+little   avg               1.728  0.812   (mean of 3, cap 1.704 GHz -> 101% of peak)
+         thermal before: BIG=38.0C MID=42.0C LITTLE=40.0C quiet_therm=31.8C 
+         thermal after : BIG=46.0C MID=38.0C LITTLE=39.0C quiet_therm=31.8C 
+
+mid        1       74.4    2.396  1.133     14.0     1.067      0.684
+mid        2       74.6    2.367  1.141     14.0     1.061      0.695
+mid        3       68.9    2.367  1.236     14.0     1.070      0.692
+mid      avg               2.377  1.170   (mean of 3, cap 2.367 GHz -> 100% of peak)
+         thermal before: BIG=37.0C MID=38.0C LITTLE=38.0C quiet_therm=31.9C 
+         thermal after : BIG=37.0C MID=37.0C LITTLE=38.0C quiet_therm=31.9C 
+
+big        1       67.2    2.731  1.097     14.0     0.938      1.314
+big        2       58.0    2.870  1.211     14.0     0.942      1.368
+big        3       64.4    2.913  1.074     14.0     1.003      1.332
+big      avg               2.838  1.127   (mean of 3, cap 2.914 GHz -> 97% of peak)
+         thermal before: BIG=44.0C MID=38.0C LITTLE=37.0C quiet_therm=31.9C 
+         thermal after : BIG=38.0C MID=38.0C LITTLE=40.0C quiet_therm=31.9C 
+
+
+restoring governors...
+  policy0  -> sched_pixel
+  policy4  -> sched_pixel
+  policy8  -> sched_pixel

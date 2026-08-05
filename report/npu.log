@@ -1,0 +1,28 @@
+=== shiba NPU bench ===
+accelerator : google-edgetpu  (fw 1.0 vii=2 kci=3 cl=697800475)
+iterations  : >= 50 per phase, capped at 10s
+affinity    : all (taskset 1ff)
+TPU temp    : 37.0C
+
+--- efficientnet_lite0_int8.tflite
+BACKEND            INIT(ms)   INFER(ms)   SPEEDUP    DELEGATED  PARTS    TPU-INF
+--------------------------------------------------------------------------------
+cpu-1thr               16.0       5.722      1.0x        60/64      5          0
+cpu-8thr               20.6      25.807      0.2x        60/64      5          0
+edgetpu              2061.8       1.358      4.2x        62/64      3       1078
+         TPU temp after: 42.0C
+
+--- mobilenet_v1_1.0_224_quant.tflite
+BACKEND            INIT(ms)   INFER(ms)   SPEEDUP    DELEGATED  PARTS    TPU-INF
+--------------------------------------------------------------------------------
+cpu-1thr               25.6      33.979      1.0x        29/31      4          0
+cpu-8thr               20.8      20.708      1.6x        29/31      4          0
+edgetpu              1114.3       1.001     34.0x        31/31      1       1457
+         TPU temp after: 43.0C
+
+Notes
+  SPEEDUP is against the first CPU row of the same model.
+  TPU-INF is the hardware inference_count delta across the run - the only evidence
+  that survives a silent fallback. It should track the reported iteration count.
+  INIT is one-time graph compilation for the accelerator; on the TPU it runs into
+  seconds and often decides whether offloading pays off at all.

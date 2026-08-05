@@ -1,0 +1,27 @@
+shiba benchmark summary
+date    : 2026-08-05 07:56:49
+device  : shiba (aosp_shiba-userdebug 15 BP1A.250505.005.B1 eng.alanhc test-keys, kernel 6.1.99-android14-11-gd7dac4b14270-ab12946699)
+units   : cpu,gpu,npu
+stages  : cpu=69s(rc0) gpu=60s(rc0) npu=20s(rc0) 
+
+CPU  (per cluster, governor pinned)
+  CLUSTER       GHz     IPC   BR-MISS%
+  little      1.728   0.812      5.76%
+  mid         2.377   1.170      1.07%
+  big         2.838   1.127      0.96%
+
+Inference latency by backend (ms, lower is better)
+  mobilenet_v1_1.0_224_quant.tflite
+    cpu-1thr         33.98     1.0x
+    cpu-8thr         20.71     1.6x
+    gpu-890MHz        7.46     4.6x
+    edgetpu           1.00    33.9x
+  efficientnet_lite0_int8.tflite
+    cpu-1thr          5.72     1.0x
+    cpu-8thr         25.81     0.2x
+    edgetpu           1.36     4.2x
+  mobilenet_v1_1.0_224.tflite
+    gpu-890MHz        5.93     1.0x
+  (speedup is against the first backend listed for that model)
+
+full logs: /home/alanhc/bench/results/20260805-075403/cpu.log /home/alanhc/bench/results/20260805-075403/gpu.log /home/alanhc/bench/results/20260805-075403/npu.log

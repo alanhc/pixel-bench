@@ -1,0 +1,52 @@
+=== shiba GPU bench ===
+gpu     : Mali-G715 7 cores r1p2 0x0B080A02
+dvfs    : 13 steps, 150000-890000 kHz
+runs    : >= 20 per phase, capped at 8s
+affinity: all (taskset 1ff)
+
+saved GPU state: policy=adaptive min=150000 max=890000
+
+--- mobilenet_v1_1.0_224.tflite
+  PIN(kHz)   INFER(ms)   EFF-MHz   %PINNED  REL-PEAK
+-----------------------------------------------------
+    890000        5.93       890      100%     1.00x
+    850000        7.15       850      100%     0.83x
+    807000        7.47       807      100%     0.79x
+    723000        7.81       723      100%     0.76x
+    649000        8.14       649      100%     0.73x
+    580000        8.57       580      100%     0.69x
+    521000        9.25       521      100%     0.64x
+    467000        9.86       467      100%     0.60x
+    419000       11.79       419      100%     0.50x
+    376000       12.31       376      100%     0.48x
+    337000       12.98       337      100%     0.46x
+    302000       13.85       302      100%     0.43x
+    150000       21.45       150      100%     0.28x
+
+--- mobilenet_v1_1.0_224_quant.tflite
+  PIN(kHz)   INFER(ms)   EFF-MHz   %PINNED  REL-PEAK
+-----------------------------------------------------
+    890000        7.46       890      100%     1.00x
+    850000        8.81       850      100%     0.85x
+    807000        7.64       807      100%     0.98x
+    723000        9.00       723      100%     0.83x
+    649000        9.34       649      100%     0.80x
+    580000       10.14       580      100%     0.74x
+    521000       10.87       521      100%     0.69x
+    467000       11.28       467      100%     0.66x
+    419000       13.42       419      100%     0.56x
+    376000       14.22       376      100%     0.52x
+    337000       14.93       337      100%     0.50x
+    302000       15.72       302      100%     0.47x
+    150000       23.68       150      100%     0.32x
+
+Notes
+  EFF-MHz is the clock the GPU actually held, computed from the time_in_state delta
+  over that run - not what was requested.
+  %PINNED should read 100% on every row; anything less means the pin did not hold and
+  that row's timing belongs to a different clock than its label claims.
+  REL-PEAK is against the highest DVFS step. Expect it to fall off well short of the
+  clock ratio - once the shaders outrun memory the extra megahertz stop buying time.
+
+restoring GPU clock policy...
+  policy=adaptive min=150000 max=890000 cur=150000
