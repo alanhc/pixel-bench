@@ -125,6 +125,11 @@ So every GPU row reports `EFF-MHz`, derived from the `time_in_state` delta over 
 run. A pinned row that reports a low effective clock means the pin did not take, not
 that the GPU is slow.
 
+(You may see it claimed that Tensor G3 exposes no OpenCL and so cannot do GPU
+inference. Not on this device: `libOpenCL.so` is present and listed in
+`/vendor/etc/public.libraries.txt`, so it is reachable from apps as well as from a
+shell binary, and every GPU number here came through it.)
+
 `--sweep` walks all 13 steps:
 
 <picture>
@@ -202,9 +207,16 @@ ships delegates for Qualcomm and Intel and lists Google Pixel as coming; the
 reaches the TPU through the newer CompiledModel API, is in beta behind a sign-up and
 states it "supports the following SoCs: Google Tensor G5" — Pixel 10, not this
 Tensor G3. So on this device deprecated NNAPI is still the only public route to the
-TPU, and it still works: everything above was measured through it. When a G3-capable
-delegate does land, `benchmark_model` already takes `--external_delegate_path`, so it
-plugs in without changing this harness.
+TPU, and it still works: everything above was measured through it.
+
+That is not just read off the docs. The vendor TPU libraries on the device
+(`libedgetpu_client.google.so` and friends, which `/vendor/etc/public.libraries.txt`
+does expose to apps) export 115 C++ `android::darwinn` / `platforms::darwinn` symbols
+and **no** C ABI — no `tflite_plugin_create_delegate`, nothing LiteRT can bind to.
+Handing one to `--external_delegate_path` gets as far as "EXTERNAL delegate created",
+then segfaults, with the `inference_count` delta at zero. There is no drop-in
+non-NNAPI path here today. When a G3-capable delegate does appear,
+`--external_delegate_path` is where it plugs in, and this harness needs no change.
 
 ### The cluster feeding an accelerator shows up in its result
 
