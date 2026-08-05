@@ -26,7 +26,9 @@ CPU  (per cluster, governor pinned)
   big         2.838   1.127      0.96%
 ```
 
-Full output from that run is in [`report/`](report/).
+Full output from that run is in [`report/`](report/). There is also a long-form
+write-up of how the whole thing was built, in Traditional Chinese:
+[`article-zh.md`](article-zh.md).
 
 ## Quick start
 
