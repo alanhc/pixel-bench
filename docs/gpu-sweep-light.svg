@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 432" width="800" height="432" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" role="img" aria-label="Mali-G715 inference latency against GPU clock: latency falls from about 22 ms at 150 MHz to about 6 ms at 890 MHz, with diminishing returns above 580 MHz.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 432" width="800" height="432" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" role="img" aria-label="Inference latency against GPU clock for MobileNet v1 224, float32 and int8, across all 13 DVFS steps. Latency falls from about 21-24 ms at 150 MHz to about 6-7 ms at 890 MHz and flattens above roughly 580 MHz. A marker at 208 MHz shows where the stock governor leaves the GPU.">
 <rect width="800" height="432" fill="#fcfcfb"/>
 <text x="62" y="32" fill="#0b0b0b" font-size="17" font-weight="600">Mali-G715 inference latency vs GPU clock</text>
-<text x="62" y="54" fill="#52514e" font-size="12.5">MobileNet v1 224 through the TFLite GPU delegate (OpenCL) &#183; Pixel 8, clock pinned at each of the 13 DVFS steps</text>
+<text x="62" y="54" fill="#52514e" font-size="12.5">MobileNet v1 224 through the TFLite GPU delegate (OpenCL) · Pixel 8, clock pinned at each of the 13 DVFS steps</text>
 <line x1="84" y1="348.0" x2="596" y2="348.0" stroke="#c3c2b7" stroke-width="1"/>
 <text x="74" y="352.0" fill="#898781" font-size="11.5" text-anchor="end" style="font-variant-numeric:tabular-nums">0</text>
 <line x1="84" y1="293.2" x2="596" y2="293.2" stroke="#e1e0d9" stroke-width="1"/>
@@ -31,7 +31,7 @@
 <line x1="124.1" y1="74" x2="124.1" y2="348" stroke="#c3c2b7" stroke-width="1.5"/>
 <text x="132.1" y="88" fill="#52514e" font-size="11.5">stock governor sits here</text>
 <text x="132.1" y="104" fill="#898781" font-size="11.5">(208 MHz effective, 23% of peak)</text>
-<polyline fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="596.0,283.0 568.3,269.6 538.6,266.1 480.5,262.4 429.3,258.8 381.5,254.1 340.7,246.6 303.3,239.9 270.1,218.8 240.4,213.1 213.4,205.7 189.2,196.2 84.0,112.9 "/>
+<polyline fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="596.0,283.0 568.3,269.6 538.6,266.1 480.5,262.4 429.3,258.8 381.5,254.1 340.7,246.6 303.3,239.9 270.1,218.8 240.4,213.1 213.4,205.7 189.2,196.2 84.0,112.9"/>
 <circle cx="596.0" cy="283.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="568.3" cy="269.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="538.6" cy="266.1" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
@@ -45,7 +45,7 @@
 <circle cx="213.4" cy="205.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="189.2" cy="196.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="84.0" cy="112.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="596.0,266.2 568.3,251.4 538.6,264.3 480.5,249.4 429.3,245.6 381.5,236.9 340.7,228.9 303.3,224.4 270.1,200.9 240.4,192.1 213.4,184.4 189.2,175.7 84.0,88.5 "/>
+<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="596.0,266.2 568.3,251.4 538.6,264.3 480.5,249.4 429.3,245.6 381.5,236.9 340.7,228.9 303.3,224.4 270.1,200.9 240.4,192.1 213.4,184.4 189.2,175.7 84.0,88.5"/>
 <circle cx="596.0" cy="266.2" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="568.3" cy="251.4" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="538.6" cy="264.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
@@ -59,11 +59,11 @@
 <circle cx="213.4" cy="184.4" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="189.2" cy="175.7" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="84.0" cy="88.5" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<text x="608.0" y="287.6" font-size="12.5"><tspan fill="#2a78d6" font-weight="600">float32</tspan><tspan dx="7" fill="#898781" style="font-variant-numeric:tabular-nums">5.93 ms</tspan></text>
-<text x="608.0" y="269.6" font-size="12.5"><tspan fill="#eb6834" font-weight="600">int8</tspan><tspan dx="7" fill="#898781" style="font-variant-numeric:tabular-nums">7.46 ms</tspan></text>
-<circle cx="67.0" cy="412.0" r="4" fill="#2a78d6"/>
-<text x="78.0" y="416.0" fill="#52514e" font-size="12">float32</text>
-<circle cx="159.0" cy="412.0" r="4" fill="#eb6834"/>
-<text x="170.0" y="416.0" fill="#52514e" font-size="12">int8</text>
-<text x="596" y="416.0" fill="#898781" font-size="11.5" text-anchor="end">lower is better</text>
+<text x="608" y="287.6" font-size="12.5"><tspan fill="#2a78d6" font-weight="600">float32</tspan><tspan dx="7" fill="#898781" style="font-variant-numeric:tabular-nums">5.93 ms</tspan></text>
+<text x="608" y="269.6" font-size="12.5"><tspan fill="#eb6834" font-weight="600">int8</tspan><tspan dx="7" fill="#898781" style="font-variant-numeric:tabular-nums">7.46 ms</tspan></text>
+<circle cx="67" cy="412" r="4" fill="#2a78d6"/>
+<text x="78" y="416" fill="#52514e" font-size="12">float32</text>
+<circle cx="159" cy="412" r="4" fill="#eb6834"/>
+<text x="170" y="416" fill="#52514e" font-size="12">int8</text>
+<text x="596" y="416" fill="#898781" font-size="11.5" text-anchor="end">lower is better</text>
 </svg>

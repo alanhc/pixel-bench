@@ -10,6 +10,14 @@
 #   adb shell service list | grep -i neural
 #     -> android.hardware.neuralnetworks.IDevice/google-edgetpu
 #
+# NNAPI is deprecated as of Android 15 and still works. The successor is LiteRT with a
+# per-vendor NPU delegate - note benchmark_model is already LiteRT's own tool, and the
+# CPU and GPU legs of this harness use current LiteRT delegates. Only the NPU leg has no
+# replacement here: LiteRT ships NPU delegates for Qualcomm and Intel and lists Google
+# Pixel as coming, and the Google Tensor SDK (CompiledModel API) is beta and supports
+# Tensor G5 only, not this G3. When a G3-capable delegate lands, benchmark_model already
+# accepts --external_delegate_path and nothing here needs to change.
+#
 # Two things make naive numbers wrong, both handled below:
 #
 #   1. NNAPI falls back to the CPU SILENTLY. Ask for google-edgetpu with a model it

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 337" width="800" height="337" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" role="img" aria-label="Mean inference latency for MobileNet v1 224 int8 on five backends: CPU one thread 33.98 ms, GPU on the stock governor 23.88, CPU eight threads 20.71, GPU pinned to 890 MHz 7.79, and the EdgeTPU 1.00 ms.">
+<rect width="800" height="337" fill="#fcfcfb"/>
+<text x="62" y="32" fill="#0b0b0b" font-size="17" font-weight="600">One model, five ways to run it</text>
+<text x="62" y="54" fill="#52514e" font-size="12.5">MobileNet v1 224 int8 · Pixel 8 · mean inference latency</text>
+<rect x="208" y="84" width="459.3" height="26" rx="4" fill="#2a78d6"/>
+<text x="196" y="101" fill="#52514e" font-size="12.5" text-anchor="end">CPU, 1 thread</text>
+<text x="677.3" y="101" fill="#0b0b0b" font-size="12.5" font-weight="600" style="font-variant-numeric:tabular-nums">33.98 ms</text>
+<rect x="208" y="126" width="322.8" height="26" rx="4" fill="#2a78d6"/>
+<text x="196" y="143" fill="#52514e" font-size="12.5" text-anchor="end">GPU, stock governor</text>
+<text x="540.8" y="143" fill="#0b0b0b" font-size="12.5" font-weight="600" style="font-variant-numeric:tabular-nums">23.88 ms</text>
+<rect x="208" y="168" width="279.9" height="26" rx="4" fill="#2a78d6"/>
+<text x="196" y="185" fill="#52514e" font-size="12.5" text-anchor="end">CPU, 8 threads</text>
+<text x="497.9" y="185" fill="#0b0b0b" font-size="12.5" font-weight="600" style="font-variant-numeric:tabular-nums">20.71 ms</text>
+<rect x="208" y="210" width="105.3" height="26" rx="4" fill="#2a78d6"/>
+<text x="196" y="227" fill="#52514e" font-size="12.5" text-anchor="end">GPU, pinned 890 MHz</text>
+<text x="323.3" y="227" fill="#0b0b0b" font-size="12.5" font-weight="600" style="font-variant-numeric:tabular-nums">7.79 ms</text>
+<rect x="208" y="252" width="13.5" height="26" rx="4" fill="#2a78d6"/>
+<text x="196" y="269" fill="#52514e" font-size="12.5" text-anchor="end">EdgeTPU via NNAPI</text>
+<text x="231.5" y="269" fill="#0b0b0b" font-size="12.5" font-weight="600" style="font-variant-numeric:tabular-nums">1.00 ms</text>
+<text x="62" y="323" fill="#898781" font-size="11.5">The EdgeTPU also costs 1.1-2.1 s of one-time graph compilation, which is usually what decides whether offloading pays off.</text>
+</svg>

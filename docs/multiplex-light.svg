@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 312" width="800" height="312" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" role="img" aria-label="Reported CPU clock against the number of hardware events counted, on a core held at a verified 2.914 GHz: three events report 2.916 GHz, four report 2.073, five report 1.679, six report 1.355.">
+<rect width="800" height="312" fill="#fcfcfb"/>
+<text x="62" y="32" fill="#0b0b0b" font-size="17" font-weight="600">simpleperf deflates the clock past three hardware events</text>
+<text x="62" y="54" fill="#52514e" font-size="12.5">Cortex-X3 pinned, scaling_cur_freq confirming 2.914 GHz throughout</text>
+<line x1="666.9" y1="74" x2="666.9" y2="240" stroke="#c3c2b7" stroke-width="1.5"/>
+<text x="673.9" y="70" fill="#52514e" font-size="11.5">true clock, 2.914 GHz</text>
+<rect x="208" y="84" width="459.3" height="26" rx="4" fill="#2a78d6"/>
+<text x="196" y="101" fill="#52514e" font-size="12.5" text-anchor="end">3 events</text>
+<text x="677.3" y="101" fill="#0b0b0b" font-size="12.5" font-weight="600" style="font-variant-numeric:tabular-nums">2.916 GHz</text>
+<rect x="208" y="126" width="326.5" height="26" rx="4" fill="#2a78d6"/>
+<text x="196" y="143" fill="#52514e" font-size="12.5" text-anchor="end">4 events</text>
+<text x="544.5" y="143" fill="#0b0b0b" font-size="12.5" font-weight="600" style="font-variant-numeric:tabular-nums">2.073 GHz</text>
+<rect x="208" y="168" width="264.4" height="26" rx="4" fill="#2a78d6"/>
+<text x="196" y="185" fill="#52514e" font-size="12.5" text-anchor="end">5 events</text>
+<text x="482.4" y="185" fill="#0b0b0b" font-size="12.5" font-weight="600" style="font-variant-numeric:tabular-nums">1.679 GHz</text>
+<rect x="208" y="210" width="213.4" height="26" rx="4" fill="#2a78d6"/>
+<text x="196" y="227" fill="#52514e" font-size="12.5" text-anchor="end">6 events</text>
+<text x="431.4" y="227" fill="#0b0b0b" font-size="12.5" font-weight="600" style="font-variant-numeric:tabular-nums">1.355 GHz</text>
+<text x="62" y="281" fill="#898781" font-size="11.5">Counter multiplexing, unscaled: task-clock keeps running while the hardware counters rotate out, so every rate against it is</text>
+<text x="62" y="298" fill="#898781" font-size="11.5">quietly deflated.</text>
+</svg>

@@ -1,0 +1,26 @@
+=== shiba GPU bench ===
+gpu     : Mali-G715 7 cores r1p2 0x0B080A02
+dvfs    : 13 steps, 150000-890000 kHz
+runs    : >= 20 per phase, capped at 8s
+affinity: all (taskset 1ff)
+
+saved GPU state: policy=adaptive min=150000 max=890000
+
+--- mobilenet_v1_1.0_224_quant.tflite
+MODE             INFER(ms)   INIT(ms)   SPEEDUP   EFF-MHz    TOP-STATE
+----------------------------------------------------------------------
+cpu-8thr             19.45       28.4     1.00x         -   (gpu idle)
+gpu-adaptive         23.88      304.4     0.81x       150       150/100%
+gpu-pinned            7.79      260.3     2.50x       890       890/100%
+
+Notes
+  EFF-MHz is the clock the GPU actually held, computed from the time_in_state delta
+  over that run - not what was requested.
+  TOP-STATE names the single DVFS step the GPU spent most of the run in, with its share.
+  A gpu-adaptive row sitting far below peak is the normal case, not a fault: the stock
+  governor cannot react inside a single short inference. Compare it against gpu-pinned
+  to see what the hardware is actually capable of.
+  SPEEDUP is against the first row of the same model.
+
+restoring GPU clock policy...
+  policy=adaptive min=150000 max=890000 cur=150000

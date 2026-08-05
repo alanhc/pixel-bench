@@ -8,19 +8,22 @@ its own evidence that it measured what it claims to**. Each of the three units h
 least one failure mode that produces a plausible, wrong, quietly-accepted result, and
 each script checks for its own.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/backends-dark.svg">
+  <img src="docs/backends-light.svg" width="800"
+       alt="Mean inference latency for MobileNet v1 224 int8 on five backends: CPU one thread 33.98 ms, GPU on the stock governor 23.88 ms, CPU eight threads 20.71 ms, GPU pinned to 890 MHz 7.79 ms, and the EdgeTPU 1.00 ms.">
+</picture>
+
+Two of those five rows are traps rather than results. The GPU row that looks
+CPU-class is the stock governor never leaving idle clocks, and a naive EdgeTPU run
+can silently be a CPU run. Both are covered below.
+
 ```
 CPU  (per cluster, governor pinned)
   CLUSTER       GHz     IPC   BR-MISS%
   little      1.728   0.812      5.76%
   mid         2.377   1.170      1.07%
   big         2.838   1.127      0.96%
-
-Inference latency by backend (ms, lower is better)
-  mobilenet_v1_1.0_224_quant.tflite
-    cpu-1thr         33.98     1.0x
-    cpu-8thr         20.71     1.6x
-    gpu-890MHz        7.46     4.6x
-    edgetpu           1.00    33.9x
 ```
 
 Full output from that run is in [`report/`](report/).
@@ -81,14 +84,13 @@ keeps running while the hardware counters are rotated out, so every rate compute
 against it is deflated. On the X3, with the governor pinned and `scaling_cur_freq`
 confirming 2.914 GHz:
 
-| hardware events | reported clock |
-|---|---|
-| 3 | 2.916 GHz ✅ |
-| 4 | 2.073 GHz |
-| 5 | 1.679 GHz |
-| 6 | 1.355 GHz |
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/multiplex-dark.svg">
+  <img src="docs/multiplex-light.svg" width="800"
+       alt="Reported CPU clock against the number of hardware events counted, on a core held at a verified 2.914 GHz: three events report 2.916 GHz, four report 2.073, five report 1.679, six report 1.355.">
+</picture>
 
-The script collects counters in several passes of three instead.
+Nothing warns you. The script collects counters in several passes of three instead.
 
 **The generic event aliases are not portable across these cores.** `simpleperf list raw`
 prints a support mask per event, and it matters: `branch-instructions` resolves to
@@ -108,10 +110,16 @@ through the GPU delegate, indistinguishable from the CPU's 20.3 ms. That invites
 conclusion that the Mali is not worth using. Pin the clock and the same graph runs in
 **6.99 ms**.
 
-The residency counters say why. Sampling `time_in_state` across an unpinned run: 1204 ms
-at 150 MHz (the floor), 319 at 302, 162 at 337, 116 at 376, and never once above
-376 MHz — an effective 208 MHz against an 890 MHz peak, **23%**. Each inference finishes
-before the governor reacts.
+The residency counters say why:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/gpu-residency-dark.svg">
+  <img src="docs/gpu-residency-light.svg" width="800"
+       alt="Time spent at each GPU frequency during one unpinned run: 1204 ms at the 150 MHz floor, 319 ms at 302 MHz, 162 ms at 337 MHz and 116 ms at 376 MHz, with nothing above 376 MHz.">
+</picture>
+
+An effective 208 MHz against an 890 MHz peak, **23%** — each inference finishes before
+the governor reacts.
 
 So every GPU row reports `EFF-MHz`, derived from the `time_in_state` delta over that
 run. A pinned row that reports a low effective clock means the pin did not take, not
@@ -149,7 +157,7 @@ latency. The marker at 208 MHz is where the stock governor actually leaves the G
 | 302 | 13.85 | 15.72 |
 | 150 | 21.45 | 23.68 |
 
-From [`report/gpu.log`](report/gpu.log); regenerate with `tools/mk-sweep-svg.sh`. The
+From [`report/gpu.log`](report/gpu.log); regenerate with `tools/mk-charts.py`. The
 int8 850 MHz point sits above its 807 MHz neighbour — run-to-run noise of a few percent,
 left in rather than smoothed away. Every row measured `%PINNED` at 100%, so each timing
 belongs to the clock its label claims.
@@ -180,6 +188,23 @@ on TPU rows.
 Watch the init column too. Compiling MobileNet for the TPU costs 1.1–2.1 s per process,
 which dwarfs any single 1 ms inference and is usually what decides whether offloading is
 worth it at all.
+
+**On NNAPI being deprecated.** It is, [as of Android 15](https://developer.android.com/ndk/guides/neuralnetworks/migration-guide),
+and the successor is LiteRT with a per-vendor NPU delegate. Worth being precise about
+what that changes here, because most of this harness is already on the new path:
+`benchmark_model` *is* LiteRT's own benchmark tool, and the CPU (XNNPACK) and GPU
+(`--use_gpu`) legs above are current LiteRT delegates, not deprecated ones.
+
+Only the NPU leg has no replacement on this chip. LiteRT's
+[NPU delegate page](https://developers.google.com/edge/litert/android/npu/overview)
+ships delegates for Qualcomm and Intel and lists Google Pixel as coming; the
+[Google Tensor SDK](https://developers.google.com/edge/litert/next/tensor-sdk), which
+reaches the TPU through the newer CompiledModel API, is in beta behind a sign-up and
+states it "supports the following SoCs: Google Tensor G5" — Pixel 10, not this
+Tensor G3. So on this device deprecated NNAPI is still the only public route to the
+TPU, and it still works: everything above was measured through it. When a G3-capable
+delegate does land, `benchmark_model` already takes `--external_delegate_path`, so it
+plugs in without changing this harness.
 
 ### The cluster feeding an accelerator shows up in its result
 
@@ -241,8 +266,8 @@ dragging.
 ```
 bench-all.sh      cpu-bench.sh    gpu-bench.sh    npu-bench.sh
 fetch-assets.sh
-tools/            mk-sweep-svg.sh, which redraws the chart from a gpu.log
-docs/             the generated chart, light and dark
+tools/            mk-charts.py, which redraws every README chart from report/
+docs/             the generated charts, light and dark
 report/           reference run committed for the numbers quoted above
 results/          local run output (gitignored)
 tflite/           downloaded binary and models (gitignored)
