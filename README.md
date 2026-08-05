@@ -117,9 +117,44 @@ So every GPU row reports `EFF-MHz`, derived from the `time_in_state` delta over 
 run. A pinned row that reports a low effective clock means the pin did not take, not
 that the GPU is slow.
 
-`--sweep` walks all 13 steps. Performance scales only 3.0x across a 5.9x clock range, so
-this workload is bandwidth-bound above roughly 580 MHz — most of the benefit is
-available well below the top step.
+`--sweep` walks all 13 steps:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/gpu-sweep-dark.svg">
+  <img src="docs/gpu-sweep-light.svg" width="800"
+       alt="Line chart of inference latency against GPU clock for MobileNet v1 224, float32 and int8, across all 13 DVFS steps. Latency falls from about 21-24 ms at 150 MHz to about 6-7 ms at 890 MHz, flattening above roughly 580 MHz. A marker at 208 MHz shows where the stock governor sits.">
+</picture>
+
+Performance scales only **3.0x across a 5.9x clock range**, so this workload is
+bandwidth-bound above roughly 580 MHz — most of the benefit is available well below the
+top step, which matters if you are pinning for throughput per watt rather than raw
+latency. The marker at 208 MHz is where the stock governor actually leaves the GPU.
+
+<details>
+<summary>Sweep data</summary>
+
+| clock (MHz) | float32 (ms) | int8 (ms) |
+|---:|---:|---:|
+| 890 | 5.93 | 7.46 |
+| 850 | 7.15 | 8.81 |
+| 807 | 7.47 | 7.64 |
+| 723 | 7.81 | 9.00 |
+| 649 | 8.14 | 9.34 |
+| 580 | 8.57 | 10.14 |
+| 521 | 9.25 | 10.87 |
+| 467 | 9.86 | 11.28 |
+| 419 | 11.79 | 13.42 |
+| 376 | 12.31 | 14.22 |
+| 337 | 12.98 | 14.93 |
+| 302 | 13.85 | 15.72 |
+| 150 | 21.45 | 23.68 |
+
+From [`report/gpu.log`](report/gpu.log); regenerate with `tools/mk-sweep-svg.sh`. The
+int8 850 MHz point sits above its 807 MHz neighbour — run-to-run noise of a few percent,
+left in rather than smoothed away. Every row measured `%PINNED` at 100%, so each timing
+belongs to the clock its label claims.
+
+</details>
 
 ### NPU — NNAPI falls back to the CPU without saying so
 
@@ -206,6 +241,8 @@ dragging.
 ```
 bench-all.sh      cpu-bench.sh    gpu-bench.sh    npu-bench.sh
 fetch-assets.sh
+tools/            mk-sweep-svg.sh, which redraws the chart from a gpu.log
+docs/             the generated chart, light and dark
 report/           reference run committed for the numbers quoted above
 results/          local run output (gitignored)
 tflite/           downloaded binary and models (gitignored)
