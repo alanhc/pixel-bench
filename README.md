@@ -228,15 +228,32 @@ does appear, that flag is where it plugs in, and this harness needs no change.
 > `RequestQueue_Submit`, `Request_Wait` and `Request_TimingInfo_GetTpuWorkNsec`. A
 > non-TFLite route to the TPU does exist.
 >
-> What blocks it is the compiler, not the ABI. `RegisterGraph` takes an
-> already-compiled Darwinn graph container, never a `.tflite`, and the runtime says so
-> itself: *"Please recompile the model with the latest compiler"*, *"Graph container
-> version ... make sure the graph is compiled with the right version"*, *"You might
-> have compiled your model for <= P24 but it is running on a P25+ device"*. Producing
-> that container needs the Tensor SDK compiler. Re-checked on a Tensor G5 (Pixel 10,
-> Android 16): the same `DarwinnApi2_*` family, 236 exports all C, plus a
-> `libedgetpu_litert.so` carrying a further 63-function Tachyon C API — and still no
-> `tflite_plugin_create_delegate` on either chip.
+> `RegisterGraph` takes an already-compiled Darwinn graph container, never a
+> `.tflite` — the runtime says so in its own error strings: *"Please recompile the
+> model with the latest compiler"*, *"Graph container version ... make sure the graph
+> is compiled with the right version"*, *"You might have compiled your model for
+> <= P24 but it is running on a P25+ device"*. Compiled graphs travel inside `.tflite`
+> files as an `edgetpu-custom-op`.
+>
+> Where that container has to come from is still open, and I am not going to guess at
+> it again. There is an on-device compiler: `/vendor/lib64/libedgetpu_tflite_compiler.so`
+> exists but is root-only and not public, while the public `libedgetpu_client.google.so`
+> — 85 KB, linking nothing but binder/AIDL stubs — exports `CompileSubgraphFlatbuffer`,
+> so it must forward to a privileged service rather than compile in-process. NNAPI
+> evidently drives that path already; graph compilation costs 1.1–2.1 s per process in
+> the numbers above. Whether an unprivileged caller can drive it too is untested.
+>
+> The gate I can actually observe is access control. `/dev/edgetpu-soc` is
+> `system:system 0660` under SELinux label `edgetpu_device`, and `adb shell` runs as
+> uid 2000 outside the `system` group with SELinux enforcing, so a shell binary cannot
+> open the device directly — everything has to go through the service. On Tensor G5
+> (Pixel 10, Android 16) that service is registered as
+> `com.google.edgetpu.IEdgeTpuAppService/default`, and there the same client library
+> exports 33 C symbols rather than G3's 7, adding a whole
+> `TachyonComputeService_*` / `TachyonComputeSession_*` session API with a
+> `TachyonComputeSessionConfig_setPrivileged` flag — which at least implies
+> unprivileged sessions are a designed-for case. On this AOSP G3 build the app service
+> is not registered at all. Both chips still lack `tflite_plugin_create_delegate`.
 >
 > Every measurement in this README went through NNAPI and is unaffected.
 
