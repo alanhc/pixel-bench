@@ -208,17 +208,37 @@ ships delegates for Qualcomm and Intel and lists Google Pixel as coming; the
 [Google Tensor SDK](https://developers.google.com/edge/litert/next/tensor-sdk), which
 reaches the TPU through the newer CompiledModel API, is in beta behind a sign-up and
 states it "supports the following SoCs: Google Tensor G5" — Pixel 10, not this
-Tensor G3. So on this device deprecated NNAPI is still the only public route to the
-TPU, and it still works: everything above was measured through it.
+Tensor G3. So for TFLite on this device, deprecated NNAPI is still the only route to
+the TPU, and it still works: everything above was measured through it.
 
-That is not just read off the docs. The vendor TPU libraries on the device
-(`libedgetpu_client.google.so` and friends, which `/vendor/etc/public.libraries.txt`
-does expose to apps) export 115 C++ `android::darwinn` / `platforms::darwinn` symbols
-and **no** C ABI — no `tflite_plugin_create_delegate`, nothing LiteRT can bind to.
-Handing one to `--external_delegate_path` gets as far as "EXTERNAL delegate created",
-then segfaults, with the `inference_count` delta at zero. There is no drop-in
-non-NNAPI path here today. When a G3-capable delegate does appear,
-`--external_delegate_path` is where it plugs in, and this harness needs no change.
+That is not just read off the docs. No library on the device exports
+`tflite_plugin_create_delegate`, so `--external_delegate_path` has nothing to bind to:
+handing it `libedgetpu_client.google.so` gets as far as "EXTERNAL delegate created",
+then segfaults, with the `inference_count` delta at zero. When a G3-capable delegate
+does appear, that flag is where it plugs in, and this harness needs no change.
+
+> **Correction (2026-08-21).** This section previously claimed the vendor TPU
+> libraries export "115 C++ symbols and **no** C ABI", and concluded there was no
+> non-NNAPI path at all. That was wrong: it generalised from a single library.
+> `libedgetpu_client.google.so` is indeed mostly C++ (48 exports, 41 mangled), but
+> `libedgetpu_util.so` — listed in the same `/vendor/etc/public.libraries.txt`, so
+> equally reachable from an app — exports **256 symbols, every one of them C**: 199
+> `DarwinnApi2_*` and 12 `DarwinnDelegate_*`, including
+> `DarwinnDelegate_CreateVirtualDevice`, `DarwinnApi2_VirtualDevice_RegisterGraph`,
+> `RequestQueue_Submit`, `Request_Wait` and `Request_TimingInfo_GetTpuWorkNsec`. A
+> non-TFLite route to the TPU does exist.
+>
+> What blocks it is the compiler, not the ABI. `RegisterGraph` takes an
+> already-compiled Darwinn graph container, never a `.tflite`, and the runtime says so
+> itself: *"Please recompile the model with the latest compiler"*, *"Graph container
+> version ... make sure the graph is compiled with the right version"*, *"You might
+> have compiled your model for <= P24 but it is running on a P25+ device"*. Producing
+> that container needs the Tensor SDK compiler. Re-checked on a Tensor G5 (Pixel 10,
+> Android 16): the same `DarwinnApi2_*` family, 236 exports all C, plus a
+> `libedgetpu_litert.so` carrying a further 63-function Tachyon C API — and still no
+> `tflite_plugin_create_delegate` on either chip.
+>
+> Every measurement in this README went through NNAPI and is unaffected.
 
 ### The cluster feeding an accelerator shows up in its result
 
