@@ -235,25 +235,48 @@ does appear, that flag is where it plugs in, and this harness needs no change.
 > <= P24 but it is running on a P25+ device"*. Compiled graphs travel inside `.tflite`
 > files as an `edgetpu-custom-op`.
 >
-> Where that container has to come from is still open, and I am not going to guess at
-> it again. There is an on-device compiler: `/vendor/lib64/libedgetpu_tflite_compiler.so`
+> There is an on-device compiler too: `/vendor/lib64/libedgetpu_tflite_compiler.so`
 > exists but is root-only and not public, while the public `libedgetpu_client.google.so`
-> — 85 KB, linking nothing but binder/AIDL stubs — exports `CompileSubgraphFlatbuffer`,
-> so it must forward to a privileged service rather than compile in-process. NNAPI
-> evidently drives that path already; graph compilation costs 1.1–2.1 s per process in
-> the numbers above. Whether an unprivileged caller can drive it too is untested.
+> — 85 KB, linking nothing but binder and AIDL stubs — exports
+> `CompileSubgraphFlatbuffer`, so it forwards to a privileged service rather than
+> compiling in-process. NNAPI drives that path already; graph compilation costs
+> 1.1–2.1 s per process in the numbers above.
 >
-> The gate I can actually observe is access control. `/dev/edgetpu-soc` is
-> `system:system 0660` under SELinux label `edgetpu_device`, and `adb shell` runs as
-> uid 2000 outside the `system` group with SELinux enforcing, so a shell binary cannot
-> open the device directly — everything has to go through the service. On Tensor G5
-> (Pixel 10, Android 16) that service is registered as
-> `com.google.edgetpu.IEdgeTpuAppService/default`, and there the same client library
-> exports 33 C symbols rather than G3's 7, adding a whole
-> `TachyonComputeService_*` / `TachyonComputeSession_*` session API with a
-> `TachyonComputeSessionConfig_setPrivileged` flag — which at least implies
-> unprivileged sessions are a designed-for case. On this AOSP G3 build the app service
-> is not registered at all. Both chips still lack `tflite_plugin_create_delegate`.
+> So why can a third party not simply use it? I built a throwaway app to find out, and
+> the answer is none of the obvious candidates. Not the API, which is complete and
+> public. Not SELinux — the binder transaction reaches the privileged service. Not the
+> uid either, although that does stop `adb shell`: `GetEdgeTpuFd` calls `getuid()` and
+> requires `uid % 100000` to land in the app range `[10000, 19999]`, so shell's 2000 is
+> rejected with EINVAL and the log line *"System and vendor processes should not use
+> GetEdgeTpuFd"*. From a real app uid the call goes through to the service, which then
+> answers:
+>
+> ```
+> E vendor.google.edgetpu_app_service@1.0-service:
+>     <pkg> is not in the EdgeTPU allowed list or signature mismatched.
+>     Please add the app to the edgetpu allowlist.
+> E EdgetpuTachyonCApi: getEdgeTpuFd failed, error code -8:
+>     Current application should not be allowed to access EdgeTPU.
+> ```
+>
+> **The gate is a vendor-side allowlist keyed on package name and signature.** Nothing
+> on the client can pass it, so third-party TPU access on a stock device is closed and
+> NNAPI stays the only route — which is what this harness uses, so the numbers stand.
+>
+> Two mechanics worth recording for anyone repeating this. A vendor public library is
+> not reachable from an app's default linker namespace, whose `permitted_paths` has no
+> `/vendor/lib64`; get it from the `sphal` namespace via
+> `dlsym(RTLD_DEFAULT, "__loader_android_get_exported_namespace")` — the unprefixed
+> `android_get_exported_namespace` does not resolve — and pass that to
+> `android_dlopen_ext` with `ANDROID_DLEXT_USE_NAMESPACE`. To run a native test binary
+> at an app uid, ship it inside the APK as `lib/arm64-v8a/lib*.so` and `run-as` it
+> there: the extracted lib directory is labelled `apk_data_file` and is executable,
+> whereas `run-as` is denied `execute` on anything under `/data/local/tmp`.
+>
+> On Tensor G5 the same client library exports 33 C symbols rather than G3's 7, adding
+> a `TachyonComputeService_*` / `TachyonComputeSession_*` session API — whose service,
+> `com.google.edgetpu.tachyon.IComputeService/default`, is not registered on the
+> device. Both chips still lack `tflite_plugin_create_delegate`.
 >
 > Every measurement in this README went through NNAPI and is unaffected.
 
